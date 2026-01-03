@@ -335,5 +335,378 @@ plt.close()
 
 Week 6: Monte Carlo integration
 
+import numpy as np
+from numpy.random import random, normal, seed 
+import matplotlib.pyplot as plt
+
+Measuring execution speed
+To measure the speed of a piece of code, if you are uring IPython/Jupyter (as Colab does), the IPython magic command %%time is very useful:
+%%time
+
+x,y=2*np.random.rand(2,N)-1
+r=np.sqrt(x*x+y*y)
+n=np.sum(r <= 1.0)
+print(4*n/N)
+Note that the similar-sounding %%timeit command will run the cell several time and calculate the average. In the absence of IPython, you can also use the datetime module:
+from datetime import datetime
+startTime = datetime.now()
+x,y=2*np.random.rand(2,N)-1
+r=np.sqrt(x*x+y*y)
+n=np.sum(r <= 1.0)
+print(4*n/N)
+print(datetime.now() - startTime)
+
+3.1410168
+0:00:00.445764
+
+
+Integration in 1D using Monte Carlo:
+def f(x):
+    return x**2
+
+N = int(1e3)
+s = 0 # s is the sum
+for i in range (N):
+    x = random() # get a random number in [0,1) ... 
+    s += f(x)
+integral = s/N
+print('Approximate result for {} points: {}'.format(N,integral))
+
+
+
+
+
+Week 7: Random walks
+
+We first look at a random walk in 1-D for a single particle. We start the particle off at the origin of the x-axis and assume that it moves unit distance in each time step (the molecular speed is thus 1 unit). At the end of each time step we set the direction to left or right with equal probability, mimicking the effect of collisions. You can easily write the python code, but for flexibility of later python coding, I show here how to define a function, called walk(steps), which is passed a single number steps and returns a vector of that length, which contains all the positions of the random walk.
+def walk(steps):
+    '''
+    steps is the length of the 1-D random walk vector returned
+    '''
+    x = np.zeros(steps, int)  # initialise the array of integers
+    x[0] = 0  # start at the origin
+    for i in range(1, len(x)):  
+        rnd = random()  # rnd selected from [0,1)
+        # step left or right randomly ...
+        if (rnd<0.5):
+            x[i] = x[i-1] + 1  # steps right one unit 
+        else:
+            x[i] = x[i-1] - 1 # steps left one unit
+    return x
+
+Vectorised function 
+
+def walk(steps):
+    '''
+    steps is the length of the 1-D random walk vector returned
+    Vectorised method.
+    '''
+    x = np.random.choice([-1, 1], size=steps) # random -1 or 1
+    x = np.cumsum(x) # cumulative sum
+    return x
+
+
+
+
+
+Week 8: Ordinary Differential Equations
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
+
+Imputing data via a link 
+
+!wget -q https://raw.githubusercontent.com/PX2134/data/master/week8/ex0.txt
+time = np.loadtxt("ex0.txt", usecols=[0]) # data[:,0] means any row but the first colum
+undecayed_nuclei = np.loadtxt("ex0.txt", usecols=[1]) # data[:,0] means any row but the second colum
+
+
+The scipy library for Python includes many functions for scientific computing and data analysis. The function odeint will let us solve numerically one or more first order ODEs using various sophisticated algorithms. It is used to find a solution  to a differential equation:
+y = scipy.integrate.odeint(func, y0, t)
+
+
+where t is the sequence of time points for which to solve for , and y is the returned solution array of the same length. y0 is the initial value of y, and func is the name of a function which defines the derivative of y.
+
+
+Example: dy/dt = -lambda*y, which has the analytic solution  as verified by substitution. It describes radioactive decay for example, where  represents the number of undecayed nuclei at a time t.
+
+npts = 1000 # Number of points
+tmax = 10 # Maximum time
+
+# setting up the time array:
+t = np.linspace(0.0, tmax, npts)
+
+# And the initial conditions:
+t[0] = 0.0
+y0 = 1e3
+
+
+So, in this case using the odeint() function would look like this:
+lam = 1.0
+def f(y, t): # return derivative(s) of the array y 
+    return -lam*y
+
+y_odeint = odeint(f, y0, t)
+
+plt.plot(t, y_odeint,'.',label='odeint')
+plt.xlabel('time')
+plt.ylabel('nuclei')
+plt.title('radioactive decay')
+plt.legend()
+
+Odient() with the analytical solution method: 
+def solution(t): # return the analytic solution
+    return y0*np.exp(-lam*t)
+
+plt.plot(t, y_odeint,'.',label='odeint')
+plt.plot(t, solution(t),label='solution')
+plt.xlabel('time')
+plt.ylabel('nuclei')
+plt.title('radioactive decay')
+plt.legend()
+plt.grid()
+
+Euler method:
+# use Euler's method to integrate equation for radioactive decay
+# y_euler is the array for the solution y:
+y_euler = np.zeros_like(t)
+y_euler[0] = y0
+
+dt = tmax/npts
+for i in range(npts -1):
+    y_euler[i+1] = y_euler[i] - lam*y_euler[i]*dt
+
+plt.plot(t, y_odeint,'.',label='odeint')
+plt.plot(t, y_euler, label='Euler')
+plt.xlabel('time')
+plt.ylabel('nuclei')
+plt.title('radioactive decay')
+plt.legend()
+plt.grid()
+
+Improving the function definition
+In order to be able to use a different value of  without modifying the function itself each time (that would be a very bad idea) you should modify the function definition and the way it is called like this:
+npts = 1000 # Number of points
+tmax = 10 # Maximum time
+
+# setting up the time array:
+t = np.linspace(0.0, tmax, npts)
+
+def f(y, t, lam): # return derivative(s) of the array y 
+    return -lam*y
+
+yinit = 1e3 # initial value
+y_odeint = odeint(f, yinit, t, args=(2.0,))
+
+
+The extra argument to the function needs to be passed to odeint as a “tuple” of values, i.e. a series of values in brackets separated by commas. So  is equal to 2.0 in this example.
+Solving several ODEs at once - look at worksheet week 8 
+
+
+
+
+
+
+
+Week 9: Further ODE solvers
+Basic numerical approach
+One way to solve the second order equations of motion is to break it down into two coupled first-order equations. This can be done as follows:
+Given some initial positions , and initial velocity components , then we integrate the first equation to get an update on the position, and the second equation to get an update on the velocity, at the next time step  later. We then repeat this for subsequent time steps. Let’s see three methods by which this can be done:
+I Euler’s method
+The simplest integration method is Euler’s method, which you used in Week 9 of PX1224 last year. The update scheme is (ensure that you understand this):
+ r(t) = r[i], r(t + change in t) = r[1+1]
+
+
+def orbit_solve (r0, v0, tmax, N, method = 'euler'):
+    # set-up the time-step using tmax and N:
+    N = 10000
+    tmax = 10
+    dt = tmax/N
+    # set up an array for the output times (using tmax, time-step and N):
+    t = np.linspace(0, tmax, N)
+    # set up arrays for the positions and velocities (see below)
+    r = np.zeros((N,2)) # N rows (time step), 2 columns (x- and y-components)
+    v = np.zeros((N,2)) # same shape for v
+    # include the initial conditions in the arrays
+    r[0] = r0
+    v[0] = v0
+    # then do the integration for all the integration points
+    for i in range (0, N-1):
+        dist = np.linalg.norm(r[i])
+        a = -G*M * r[i] / dist**3
+        r[i+1] = r[i] + v[i]*dt
+        v[i+1] = v[i] + a*dt
+    # output the solution (arrays for positions and velocities) versus time
+    return t, r, v
+
+
+
+
+II Euler-Cromer method
+In the Euler-Cromer method, we update the velocity first, and then use the new velocity to update the position. i.e.,
+An even better method is …
+def orbit_solve(r0, v0, tmax, N):
+    dt = tmax / N
+    t = np.linspace(0, tmax, N)
+
+
+    r = np.zeros((N, 2))
+    v = np.zeros((N, 2))
+
+
+    r[0] = r0
+    v[0] = v0
+
+
+    G = 1
+    M = 1
+
+
+    for i in range(N - 1):
+        dist = np.linalg.norm(r[i])
+        a = -G*M * r[i] / dist**3   # gravitational acceleration
+
+
+        r[i+1] = r[i] + v[i] * dt
+        v[i+1] = v[i] + a * dt
+
+
+    return t, r, v
+
+
+III Verlet method
+This was popularised by Loup Verlet in 1967 (although first discovered two centuries before) for molecular dynamics simulations. It is very important nowadays for calculating such things as the interaction of large molecules (e.g. for developing theraputic drugs).
+The method can be written as:
+ #Verlet method
+    elif method == "verlet":
+        a = acceleration(r[0])
+        for i in range(N - 1):
+            # position update
+            r[i+1] = r[i] + v[i] * dt + 0.5 * a * dt**2
+
+
+            # compute acceleration at new position
+            a_new = acceleration(r[i+1])
+
+
+            # velocity update
+            v[i+1] = v[i] + 0.5 * (a + a_new) * dt
+
+
+            # prepare for next iteration
+            a = a_new
+Strictly speaking, this is called the 'velocity Verlet' method. (It is closely related to the so-called 'leapfrog' method.)
+So you need to evaluate the acceleration  at the current point (time ) and the next point (time ). Since  depends only on position  in our case of orbits, this is straightforward because the next position is calculated in the first line.
+The clever thing about the integrator is that it is time-reversible, and this means that the energy of the system is in principle exactly (not just approximately) conserved. This leads to huge improvements in accuracy.
+Exercise 3 - Modify your function to include both the Euler-Cromer method and the Verlet method. The method keyword in the function should be used to select the integration method used in the function (using an if statement).
+def orbit_solve(r0, v0, tmax, N, method="euler"):
+
+
+    dt = tmax / N
+    t = np.linspace(0, tmax, N)
+
+
+    r = np.zeros((N, 2))
+    v = np.zeros((N, 2))
+
+
+    r[0] = r0
+    v[0] = v0
+
+
+    GM = 1.0
+
+
+    # gravitational acceleration
+    def acceleration(pos):
+        dist = np.linalg.norm(pos)
+        return -GM * pos / dist**3
+    #Euler method
+    if method == "euler":
+        for i in range(N - 1):
+            a = acceleration(r[i])
+            r[i+1] = r[i] + v[i] * dt
+            v[i+1] = v[i] + a * dt
+
+
+    #Euler-cromer method
+    elif method == "euler-cromer":
+        for i in range(N - 1):
+            a = acceleration(r[i])
+            v[i+1] = v[i] + a * dt     # Update v first (symplectic)
+            r[i+1] = r[i] + v[i+1] * dt
+
+
+    #Verlet method
+    elif method == "verlet":
+        a = acceleration(r[0])
+        for i in range(N - 1):
+            # position update
+            r[i+1] = r[i] + v[i] * dt + 0.5 * a * dt**2
+
+
+            # compute acceleration at new position
+            a_new = acceleration(r[i+1])
+
+
+            # velocity update
+            v[i+1] = v[i] + 0.5 * (a + a_new) * dt
+
+
+            # prepare for next iteration
+            a = a_new
+
+
+    else:
+        raise ValueError("Unknown method. Choose 'euler', 'euler-cromer', or 'verlet'.")
+
+
+    return t, r, v
+
+
+[ ]
+
+Exercise 4 - Compare the Euler, Euler-Cromer and Verlet method by plotting a graph for a given number of points. Again, choose just a few orbits.
+#initila conditions
+r0 = np.array([10.0, 0.0])
+v0 = np.array([0.0, np.sqrt(1/10)])
+
+
+# one orbital period
+T = 2 * np.pi * np.sqrt(10**3)
+
+
+# simulate for two orbits
+tmax = 2 * T
+
+
+# number of time steps
+N = 400
+
+
+t_e, r_e, v_e = orbit_solve(r0, v0, tmax, N, method="euler")
+t_ec, r_ec, v_ec = orbit_solve(r0, v0, tmax, N, method="euler-cromer")
+t_v, r_v, v_v = orbit_solve(r0, v0, tmax, N, method="verlet")
+
+
+plt.figure(figsize=(8,8))
+plt.plot(r_e[:,0], r_e[:,1], color="red", label="Euler")
+plt.plot(r_ec[:,0], r_ec[:,1], color="blue", label="Euler–Cromer")
+plt.plot(r_v[:,0], r_v[:,1], color="green", label="Verlet")
+plt.scatter([0], [0], s=40, color="black") # middle marker
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Orbit Comparison: Euler, Euler–Cromer, Verlet")
+plt.grid()
+plt.legend()
+
+
+
+
+
+Week 10: Fourier Transform
+
+
 
 
