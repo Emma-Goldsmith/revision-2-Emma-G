@@ -24,6 +24,12 @@ savefig("2d_array.png")
 Upload data from a link
 ! wget -q link.
 
+
+
+
+
+
+
 Week 2: Functions 
 
 create function that converts angles in degrees to radians
@@ -93,6 +99,12 @@ print ('Time from', height, 'metre', 'is' , T(height, 9.8),'s')
 
 Linear fit graph with line of best fit
 
+
+
+
+
+
+
 Week 3: Uncertainties propagation
 
 
@@ -130,5 +142,148 @@ Distance is: 15.609024890896208 m, with an error of: 0.537283338762715
 
 Exercise 0 - having multiple values and errrors, how to deal with this
 "35.6+/-3.9","30.6+/-3.7","63.1+/-3.2","23.2+/-9.8","13.6+/-4.5","35.7+/-6.8","13.7+/-6.0","7.7+/-2.4","20.5+/-4.0"
+
+
+
+
+
+
+Week 4: Curve fitting
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+
+Fitting with a straight line 
+# put some test data into arrays ...
+x_data = np.array([ 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ]) 
+y_data = np.array([ 2, 104, 212, 302, 398, 507, 606, 692 ])
+
+# define a nice, self-contained fitting routine.
+def linfit(x, y):
+    '''
+    Takes input arrays x an y and performs a linear least squares fit.
+    Returns estimated slope, error is slope, 
+    intercept, error in intercept.
+    '''
+    # do LSF using method described in PX1224 week 4 ...
+    p_coeff, residuals, _, _, _ = np.polyfit(x, y, 1, full=True)
+    # Note: residuals is returned as an array with one element.
+    # residuals[0] is the value of this element
+    n = len(x)
+    D = sum(x**2) - 1./n * sum(x)**2
+    x_bar = np.mean(x)
+    dm_squared = 1./(n-2)*residuals[0]/D
+    dc_squared = 1./(n-2)*(D/n + x_bar**2)*residuals[0]/D
+    dm = np.sqrt(dm_squared)
+    dc = np.sqrt(dc_squared)
+    return p_coeff[0], dm, p_coeff[1], dc
+
+# Calling the fitting function:
+m, dm, c, dc = linfit(x_data, y_data)
+print ('slope: ', m, '+/-', dm) 
+print ('intercept: ', c, '+/-', dc) 
+print ()
+
+# Now for plotting purposes, we define a linear function
+def linear(x, m, c): 
+    return m*x + c
+
+# alternative method to define the linear function
+# (effectively, it's identical to the other method 
+# *p means just a list of values)
+def linear(x, *p):
+    return p[0]*x + p[1]
+
+# plot data
+plt.plot(x_data, y_data, 'r.',label='data')
+# plot fit
+x_plot = np.linspace(min(x_data),max(x_data),num=100)
+plt.plot(x_plot, linear(x_plot, m, c), 'b-',label='fit') 
+plt.xlabel('x value')
+plt.ylabel('y value')
+plt.title('Plot of y versus x using linfit')
+plt.legend()
+plt.grid ()
+slope:  99.0595238095238 +/- 0.9295121405070327
+intercept:  6.166666666666632 +/- 3.8884282607017973
+
+ 
+The general way the curve fitting function is used is like this:
+popt, pcov = curve_fit(f=func, xdata=x, ydata=y, p0=init_guess, bounds=([a_min, b_min], [a_max, b_max]))
+Here, func is just the name of a function that you have defined, x and y are equal length data arrays, init_guess is an array of initial values (somewhere near to the final values you expect). (They don’t have to be called func, x, y and init_guess since those names are up to you in your program. But the f= parts and so on must be written as above.) The term bounds is to constrain the range of the parameters fitted and can usually be left out.
+Example: 
+
+def quadratic(x, *p):
+    return p[0]*x**2 + p[1]*x + p[2]
+
+x_plot = np.linspace(min(x_data),max(x_data),num=100)
+
+# compute a guess curve by creating an array y_guess of data points.
+p_guess = np.array([10.0, 1.0, 0.0]) # initial guess 
+y_guess = quadratic(x_plot, *p_guess) # values come from an educated guess looking at the data.
+
+# plot data
+plt.plot(x_data, y_data, 'r.',label='data')
+# plot fit
+plt.plot(x_plot, y_guess, 'b-',label='guess') 
+plt.xlabel('x value')
+plt.ylabel('y value')
+plt.title('Plot of y versus x using an initial guess of quadratic()')
+plt.legend()
+plt.grid ()
+
+# now do curve fit. We can use the initial guess from before
+# we must pass the #name# of the function ...
+popt, pcov = curve_fit(quadratic, x_data, y_data, p_guess) # do fit
+
+#the error in popt[0] can be found as sqrt(pcov.diagonal()[0])
+
+printing out the fitted coefficients and the errors for example, or plotting the data and the fitted curve.
+print ('a: ', popt[0], '+/-', np.sqrt(pcov.diagonal()[0])) 
+print ('b: ', popt[1], '+/-', np.sqrt(pcov.diagonal()[1])) 
+print ('c: ', popt[2], '+/-', np.sqrt(pcov.diagonal()[2])) 
+print ()
+
+x_plot = np.linspace(min(x_data),max(x_data),num=100)
+
+# find fitted curve by creating an array yfit of data points ...
+yfit = quadratic(x_plot, *popt)
+
+# plot data
+plt.plot(x_data, y_data, 'r.',label='data')
+# plot fit
+plt.plot(x_plot, yfit, 'b-',label='fit')
+plt.xlabel('x value')
+plt.ylabel('y value')
+plt.title('Plot of y versus x using curve_fit')
+plt.legend()
+plt.grid ()
+
+
+a:  -0.5297619047848805 +/- 0.4506307555014284
+b:  102.76785714307914 +/- 3.280641440439505
+c:  2.4583333333387096 +/- 4.9158036871993405
+# quadratic(x, *popt) is an alternative to quadratic(x, popt[0], popt[1], popt[2])
+
+Importing a csv file 
+The data file XRD_data_Mo_anode.csv:
+! wget -q https://raw.githubusercontent.com/PX2134/data/master/week4/XRD_data_Mo_anode.csv
+XRD = np.loadtxt('XRD_data_Mo_anode.csv', delimiter=',')
+
+
+x_full = XRD[:, 0] # for the first row
+cr_full = XRD[:,1] # for the second row
+
+2. Fitting gaussian shape 
+
+
+
+
+
+Week 5: Further curve fitting
+
 
 
