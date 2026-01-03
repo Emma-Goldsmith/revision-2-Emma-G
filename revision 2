@@ -1,0 +1,134 @@
+Week 1: Revisions and Set-up
+
+Creating a file and writing in it
+f=open(“file.txt”, “w”) #w means write
+#stuff to find value
+f.write(f”blah blah{value}\n”)
+f.close()
+
+Reading a file
+f=open(“file.txt”, “r”) #r means read
+Text = f.read()
+f.close()
+print(text)
+
+Ploting 2-D function z=sin(x)sin(y-1) using imshow(). Use mgrid, set origin to the lower left corner. 
+y,x = mgrid[0:pi:0.1,0:pi:0.1]
+z = sin(x)*sin(y -1)
+imshow(z, origin='lower')
+colorbar()
+
+Saving a figure
+savefig("2d_array.png")
+
+Upload data from a link
+! wget -q link.
+
+Week 2: Functions 
+
+create function that converts angles in degrees to radians
+def convert(angle):
+  return (angle*np.pi)/180
+
+Split a string/ data set
+delimiter=’,’
+XRD = np.loadtxt('XRD_data_Mo_anode.csv', delimiter=',')
+x_full = XRD[:, 0] #to get the whole of the first column
+cr_full = XRD[:,1] #to get the whole of the second column
+
+Defining a function
+def cube(x):
+    """
+    Return the cube of x
+    >>> cube(3)
+    27
+    """
+    return x * x * x  
+
+x = 3.1
+print('Cube of', x, 'is', cube(x))
+'''
+Of course, we don't have to use the same variable name 'x'. This is 
+a 'dummy variable' in the function.
+'''
+y = 3.1
+print('Cube of', y, 'is', cube(y))
+
+print('Cube of', 1.3, 'is', cube(1.3))
+
+
+# Define a simple function ...
+def print_cube(x):
+    """
+    Prints the cube of x
+    >>> print_cube(3)
+    Cube of 3 is 27
+    """
+    print('Cube of', x, 'is', x * x * x)  
+
+print_cube(3)
+
+# Define a less simple function ...
+def linear(x, m, c):
+    '''
+    This returns a linear function of a variable x 
+    '''
+    return m*x + c
+
+x = 1.2
+y = linear(x, 2, 1)
+print(y)
+
+
+def T(h, g):
+    '''
+    Returns fall time [s] of a mass released from a height
+    h [m] above the Earth's surface. g in ms^-2.
+    '''
+    return sqrt(2*h/g)
+
+height = 1  # metre    
+print ('Time from', height, 'metre', 'is' , T(height, 9.8),'s')
+
+
+Linear fit graph with line of best fit
+
+Week 3: Uncertainties propagation
+
+
+We will use a new module uncertainties, which is not standard in the colab environment. You will have to first run: 
+
+! pip install -q uncertainties
+
+
+To install the module before you can import it:
+import uncertainties as uc
+import uncertainties.umath as um # for maths functions
+
+Example 1: If the length of a rectangle is  and its breadth is , what is its area and the error in the area? The following code snippet solves this problem in a few lines.
+L = uc.ufloat(1.24, 0.02)
+W = uc.ufloat(0.61, 0.01)
+print ('Area is:', L*W, 'm^2') # Do remember to add the units when printing!
+
+Instead, the error progation formula gives:
+np.abs(1.24*0.61)*np.sqrt((0.02/1.24)**2+(0.01/0.61)**2)
+
+
+Example 2: A reference object is  long, and makes a viewing angle of . How far is it?
+L = uc.ufloat(10.0, 0.0001)
+theta = uc.ufloat(0.62,0.02)
+
+Distance = (L/2)/um.tan(theta/2)
+
+print ('Distance is:', Distance.nominal_value, 'm, with an error of:', Distance.std_dev)
+
+ >>> First number is the nominal value, second value is the standard deviation 
+
+
+Distance is: 15.609024890896208 m, with an error of: 0.537283338762715
+
+
+Exercise 0 - having multiple values and errrors, how to deal with this
+"35.6+/-3.9","30.6+/-3.7","63.1+/-3.2","23.2+/-9.8","13.6+/-4.5","35.7+/-6.8","13.7+/-6.0","7.7+/-2.4","20.5+/-4.0"
+
+
