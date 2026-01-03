@@ -285,5 +285,55 @@ cr_full = XRD[:,1] # for the second row
 
 Week 5: Further curve fitting
 
+In this worksheet we’ll have a further look at curve_fit(), in particular in the presence of noisy data.
+
+3d functions 
+
+# Some imports for animating.
+from matplotlib.animation import FuncAnimation
+from IPython import display # This is specific to IPython, upon which jupyter notebooks are built.
+
+Animating:
+# Creating an empty figure
+fig = plt.figure()
+ax = plt.axes()
+
+# Initialisation of the plot element `line` as empty:
+line, = ax.plot([],label='data',color='red')
+# We could in general have more than one plot element.
+
+x=np.linspace(0,2*np.pi,100)
+
+# Setting axes so they don't move from frame to frame
+ax.set_xlim(0,2*np.pi)
+ax.set_ylim(-1.1,1.1)
+
+# The anination function, which gets run for each frame, with a 
+# different frame number. It has to accept as input a single 
+# frame number, and replace the data for each frame number
+def animate(frame_num):
+    
+    # This function updated the data of the line element.
+    # In this example we have a sine wave, but this could
+    # be anything that depends on the frame number.
+    line.set_data(x,np.sin(x+frame_num/100))
+    return line
+
+# Animation function, for `frames` number of frame, with `interval` ms
+# between frames.
+anim=FuncAnimation(fig,animate,frames=100, interval=20)     
+
+# And display
+video = anim.to_html5_video()
+html = display.HTML(video)
+display.display(html)
+plt.close()
+
+
+
+
+
+Week 6: Monte Carlo integration
+
 
 
