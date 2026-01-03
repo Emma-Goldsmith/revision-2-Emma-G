@@ -706,7 +706,32 @@ plt.legend()
 
 
 Week 10: Fourier Transform
+import matplotlib.pyplot as plt 
+import numpy as np
+from numpy.fft import fft, ifft
+
+FFT
+There are several FFT algorithms which are simple to use. We’ll just use fft and ifft. First set up a data array to test out the method:
+# Examine a small number of points to see what happens more easily
+N=16 # the fft algorithm is fastest for N a power of 2
+tau = 10.0 # time length
+t = np.linspace(0, tau, N, endpoint=False) # creates N points to cover tau seconds
+# Choose endpoint False so that signal would fit exactly periodically within tau
+print(t)
+#
+f = 0.2 # frequency in Hz
+x = np.cos(2*np.pi*f*t) # create x array, amplitude 1.0 
+plt.plot(x)
+plt.plot(x, 'o') # show as points and line 
+# Note how the plot is exactly periodic
+
+plt.title('Single cosine wave sampled at {} points'.format(N))
+plt.xlabel('point number')
+plt.ylabel('x(N)')
+plt.grid()
 
 
+[0.    0.625 1.25  1.875 2.5   3.125 3.75  4.375 5.    5.625 6.25  6.875
+ 7.5   8.125 8.75  9.375]
 
 
