@@ -895,4 +895,68 @@ plt.show()
 print(f"Absolute minimum at ({abs_min_x:.2f}, {abs_min_y:.2f})")
 
 
+
+
 ##### semi-amplitude is half of the total "peak-to-peak" distance of a wave or oscillation, representing the maximum displacement from the equilibrium (average) position to its highest or lowest point.
+
+
+
+##### sinosudal model 
+#sinosudal model:
+def rv_model(t, P, K, gamma):
+    return gamma + K*np.sin(2* np.pi *t/P)
+
+#initial guesses from exercise 2
+P0 = average_td* 24*60*60 #seconds
+K0 = semi_amplitude #km/s
+gamma0 = mean #average velocity
+
+p0 = [P0, K0, gamma0]
+
+
+
+
+#### using curve-fit
+popt, pcov = curve_fit(
+    rv_model,
+    time,
+    velocity,
+    p0=p0,
+    sigma=uncertainty,
+    absolute_sigma=True
+)
+
+P_fit, K_fit, gamma_fit = popt
+P_err, K_err, gamma_err = np.sqrt(np.diag(pcov))
+
+
+
+
+###### generating model curves
+t_fine = np.linspace(min(time), max(time), 1000)
+
+v_initial = rv_model(t_fine, P0, K0, gamma0)
+v_fit = rv_model(t_fine, P_fit, K_fit, gamma_fit)
+
+
+
+#### plotting with error bars
+plt.figure(figsize=(8, 5))
+
+# Data with error bars
+plt.errorbar(time, velocity, yerr=uncertainty, fmt='o', color='black',
+             label='Radial velocity data')
+
+# Initial guess model
+plt.plot(t_fine, v_initial, '--', color='blue',
+         label='Initial guess model')
+
+# Best-fit model
+plt.plot(t_fine, v_fit, '-', color='red',
+         label='Best-fit model')
+
+plt.xlabel('Time')
+plt.ylabel('Radial Velocity')
+plt.legend()
+plt.tight_layout()
+plt.show()
