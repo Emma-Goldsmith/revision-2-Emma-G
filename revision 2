@@ -807,3 +807,16 @@ plt.errorbar(x, y,
              yerr = y_error,
              xerr = x_error, 
              fmt ='o')
+
+
+#### maxima, finding peaks, peak difference
+
+from scipy.signal import find_peaks
+peak_indices, _ = find_peaks(velocity, height=75, distance=10) # Example: height > 0.5, min 10 points apart
+
+# 3. Get Peak Values & Locations
+peak_y_values = velocity[peak_indices]
+peak_x_values = time[peak_indices]
+
+print("Peak X-Values:", peak_x_values)
+print("Peak Y-Values:", peak_y_values)
