@@ -735,3 +735,53 @@ plt.grid()
  7.5   8.125 8.75  9.375]
 
 
+
+error bars
+
+### adding error to y values 
+import matplotlib.pyplot as plt 
+
+x =[1, 2, 3, 4, 5, 6, 7]
+y =[1, 2, 1, 2, 1, 2, 1]
+
+# creating error
+y_error = 0.2
+
+# plotting graph
+plt.plot(x, y)
+
+plt.errorbar(x, y,
+             yerr = y_error,
+             fmt ='o')
+
+### adding error to x values 
+import matplotlib.pyplot as plt 
+
+x =[1, 2, 3, 4, 5, 6, 7]
+y =[1, 2, 1, 2, 1, 2, 1]
+
+# creating error
+x_error = 0.5
+
+# plotting graph
+plt.plot(x, y)
+plt.errorbar(x, y,
+             xerr = x_error,
+             fmt ='o')
+
+### adding errors to x and y values 
+import matplotlib.pyplot as plt 
+
+x =[1, 2, 3, 4, 5, 6, 7]
+y =[1, 2, 1, 2, 1, 2, 1]
+
+# creating error
+x_error = 0.5
+y_error = 0.3
+
+# plotting graph
+plt.plot(x, y)
+plt.errorbar(x, y, 
+             yerr = y_error, 
+             xerr = x_error, 
+             fmt ='o')
