@@ -835,8 +835,8 @@ prominence: How much a peak stands out from the surrounding baseline.
 # The 'prominence' helps filter out small wiggles
 min_indices, _ = find_peaks(-y, prominence=0.2) # Adjust prominence as needed
 
-# Get the actual x and y values of the minima
 min_x = x[min_indices]
+# Get the actual x and y values of the minima
 min_y = y[min_indices]
 
 plt.plot(x, y, label='Original Data')
@@ -893,3 +893,6 @@ plt.legend()
 plt.show()
 
 print(f"Absolute minimum at ({abs_min_x:.2f}, {abs_min_y:.2f})")
+
+
+##### semi-amplitude is half of the total "peak-to-peak" distance of a wave or oscillation, representing the maximum displacement from the equilibrium (average) position to its highest or lowest point.
