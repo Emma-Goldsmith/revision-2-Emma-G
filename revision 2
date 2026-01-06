@@ -820,3 +820,76 @@ peak_x_values = time[peak_indices]
 
 print("Peak X-Values:", peak_x_values)
 print("Peak Y-Values:", peak_y_values)
+
+
+Key find_peaks Parameters
+height: Minimum height of a peak.
+threshold: Minimum vertical difference between a peak and its neighbors.
+distance: Minimum horizontal distance (in samples) between peaks.
+prominence: How much a peak stands out from the surrounding baseline. 
+
+
+### minima, peaks, minimum
+
+# Find peaks in the *negative* data to find minima
+# The 'prominence' helps filter out small wiggles
+min_indices, _ = find_peaks(-y, prominence=0.2) # Adjust prominence as needed
+
+# Get the actual x and y values of the minima
+min_x = x[min_indices]
+min_y = y[min_indices]
+
+plt.plot(x, y, label='Original Data')
+plt.scatter(min_x, min_y, color='red', label='Local Minima')
+plt.title('Finding Minima with SciPy')
+plt.legend()
+plt.show()
+
+Method 2: Manual Iteration (For simple, clean data)
+Good for understanding the logic or for very simple datasets. 
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 10, 100)
+y = np.cos(x) # Clean data
+
+local_min_indices = []
+for i in range(1, len(y) - 1): # Check points between first and last
+    if y[i-1] >= y[i] and y[i] <= y[i+1]: # Left is higher/equal, Right is higher/equal
+        local_min_indices.append(i)
+
+min_x = x[local_min_indices]
+min_y = y[local_min_indices]
+
+plt.plot(x, y)
+plt.scatter(min_x, min_y, color='green')
+plt.title('Manual Local Minima')
+plt.show()
+
+print("Local minima (x, y):", list(zip(min_x, min_y)))
+
+
+Method 3: Finding the Absolute Minimum
+Use numpy.argmin() to find the index of the single lowest point. 
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 10, 100)
+y = np.sin(x * 2) + x/10
+
+# Index of the absolute minimum
+min_idx = np.argmin(y)
+
+# Coordinates
+abs_min_x = x[min_idx]
+abs_min_y = y[min_idx]
+
+plt.plot(x, y)
+plt.scatter(abs_min_x, abs_min_y, color='purple', s=100, label='Absolute Minimum')
+plt.title('Absolute Minimum with NumPy')
+plt.legend()
+plt.show()
+
+print(f"Absolute minimum at ({abs_min_x:.2f}, {abs_min_y:.2f})")
